@@ -11,9 +11,9 @@ instance_type              = "t3.small"
 db_name                    = "customer_db"
 db_identifier              = "mysqldb"
 instance_class             = "db.t3.medium"
-repl_instance_identifier   = "dms-repl-instance"
-repl_instance_class        = "dms.t3.small"
-repl_subnet_group_name     = "dms-subnet-grp"
+# repl_instance_identifier   = "dms-repl-instance"
+# repl_instance_class        = "dms.t3.small"
+# repl_subnet_group_name     = "dms-subnet-grp"
 
 # tags = {
 #   "Project"     = "capci-mgn-lab"
