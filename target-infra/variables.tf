@@ -110,11 +110,11 @@ variable "db_engine" {
   default     = "mysql"
 }
 
-variable "db_port" {
-  description = "RDS database engine port"
-  type        = number
-  default     = 3306
-}
+# variable "db_port" {
+#   description = "RDS database engine port"
+#   type        = number
+#   default     = 3306
+# }
 variable "storage_type" {
   description = "Storage type for the rds"
   type        = string
@@ -150,26 +150,26 @@ variable "db_maintenance_window" {
   default     = "SUN:10:00-SUN:22:00"
 }
 
-variable "repl_subnet_group_name" {
-  description = "DMS subnet group name"
-  type        = string
-}
+# variable "repl_subnet_group_name" {
+#   description = "DMS subnet group name"
+#   type        = string
+# }
 
-variable "repl_subnet_group_description" {
-  description = "A description for the DMS subnet group"
-  type        = string
-  default     = "DMS Subnet group"
-}
+# variable "repl_subnet_group_description" {
+#   description = "A description for the DMS subnet group"
+#   type        = string
+#   default     = "DMS Subnet group"
+# }
 
-variable "repl_instance_class" {
-  description = "Instance class/type for the DMS replication instance"
-  type        = string
-}
+# variable "repl_instance_class" {
+#   description = "Instance class/type for the DMS replication instance"
+#   type        = string
+# }
 
-variable "repl_instance_identifier" {
-  description = "DMS replication instance identifier"
-  type        = string
-}
+# variable "repl_instance_identifier" {
+#   description = "DMS replication instance identifier"
+#   type        = string
+# }
 
 variable "log_bucket_prefix" {
   description = "Prefix for the log bucket name"
