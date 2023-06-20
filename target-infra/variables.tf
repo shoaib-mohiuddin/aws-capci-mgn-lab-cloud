@@ -212,3 +212,8 @@ variable "flow_log_per_hour_partition" {
   type        = bool
   default     = true
 }
+
+
+variable "foo" {
+  type = string
+}
