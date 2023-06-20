@@ -49,12 +49,12 @@ jobs:
     name: Checkov
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
-    strategy:
-      matrix: 
-        working-directory: 
-          - dns
-          - target-infra
-          # - sysops-admin
+    # strategy:
+    #   matrix: 
+    #     working-directory: 
+    #       - dns
+    #       - target-infra
+    #       # - sysops-admin
     steps:
       - name: Checkout PR branch
         uses: actions/checkout@v3
@@ -82,12 +82,12 @@ jobs:
       contents: read
       # Required to post comments
       pull-requests: write
-    strategy:
-      matrix: 
-        working-directory: 
-          - dns
-          - target-infra
-          # - sysops-admin
+    # strategy:
+    #   matrix: 
+    #     working-directory: 
+    #       - dns
+    #       - target-infra
+    #       # - sysops-admin
 
     env:
       TF_ROOT: .
