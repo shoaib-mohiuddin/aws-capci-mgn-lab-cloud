@@ -16,7 +16,7 @@ jobs:
         working-directory: 
           - dns
           - target-infra
-          - sysops-admin
+          # - sysops-admin
     defaults:
       run:
         working-directory: ${{ matrix.working-directory }}
@@ -54,7 +54,7 @@ jobs:
         working-directory: 
           - dns
           - target-infra
-          - sysops-admin
+          # - sysops-admin
     steps:
       - name: Checkout PR branch
         uses: actions/checkout@v3
@@ -68,7 +68,7 @@ jobs:
         id: checkov
         uses: bridgecrewio/checkov-action@master
         with:
-          directory: ${{ matrix.working-directory }}
+          directory: .
           framework: terraform 
           download_external_modules: true
           # soft_fail: true
@@ -87,10 +87,10 @@ jobs:
         working-directory: 
           - dns
           - target-infra
-          - sysops-admin
+          # - sysops-admin
 
     env:
-      TF_ROOT: ${{ matrix.working-directory }}
+      TF_ROOT: .
 
     steps:
       - name: Setup Infracost
@@ -145,7 +145,7 @@ jobs:
         working-directory: 
           - dns
           - target-infra
-          - sysops-admin
+          # - sysops-admin
     defaults:
       run:
         shell: bash
