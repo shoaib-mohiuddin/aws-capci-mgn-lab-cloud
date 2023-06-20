@@ -100,6 +100,9 @@
 
 | Name | Description |
 |------|-------------|
+| <a name="output_db_instance_address"></a> [db\_instance\_address](#output\_db\_instance\_address) | n/a |
+| <a name="output_rds_sg_id"></a> [rds\_sg\_id](#output\_rds\_sg\_id) | n/a |
+| <a name="output_staging_area_subnet_ids"></a> [staging\_area\_subnet\_ids](#output\_staging\_area\_subnet\_ids) | n/a |
 | <a name="output_target_vpc_id"></a> [target\_vpc\_id](#output\_target\_vpc\_id) | n/a |
 | <a name="output_webserver_instance_id"></a> [webserver\_instance\_id](#output\_webserver\_instance\_id) | n/a |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
