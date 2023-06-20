@@ -24,16 +24,6 @@ data "aws_secretsmanager_secret_version" "mysql_creds_version" {
   secret_id = data.aws_secretsmanager_secret.mysql_creds.id
 }
 
-# data "terraform_remote_state" "on_prem_instances" {
-#   backend = "s3"
-#   config = {
-#     bucket         = "capci-mgn-lab-tfstates"
-#     key            = "capci-mgn-lab/on-prem-vpc/terraform.tfstates"
-#     region         = "us-west-2"
-#     dynamodb_table = "terraform-lock-capci-mgn-lab"
-#   }
-# }
-
 data "aws_ami" "ami_webserver" {
   most_recent = true
   filter {

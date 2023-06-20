@@ -1,0 +1,37 @@
+files: ^dns/,^target-infra/
+repos:
+- repo: https://github.com/antonbabenko/pre-commit-terraform
+  rev: v1.79.1 # Get the latest from: https://github.com/antonbabenko/pre-commit-terraform/releases
+  hooks:
+    - id: terraform_fmt
+    - id: terraform_validate
+    # - id: terraform_tflint
+    # - id: terraform_tfsec
+    - id: terraform_docs
+      args:
+        - --hook-config=--path-to-file=../README.md        
+    # - id: terraform_checkov
+
+- repo: https://github.com/awslabs/git-secrets
+  rev: master # Get the latest from: https://github.com/awslabs/git-secrets
+  hooks:
+    - id: git-secrets
+      name: Git Secrets
+      description: git-secrets scans commits, commit messages, and --no-ff merges to prevent adding secrets into your git repositories.
+      entry: 'git-secrets --pre_commit_hook'
+      language: script
+      # files: \.(js|py|sh|yml|yaml|json|tf)$
+
+# - repo: https://github.com/pre-commit/pre-commit-hooks
+#   rev: v4.1.0
+#   hooks:
+#     - id: trailing-whitespace
+#     - id: end-of-file-fixer
+#     - id: check-yaml
+#     - id: check-added-large-files
+
+# - repo: https://github.com/terraform-docs/terraform-docs
+#   rev: v0.16.0
+#   hooks:
+#     - id: terraform-docs-go
+#       args: [“markdown”, “table”, “--output-file”, “README.md”, “../“]
