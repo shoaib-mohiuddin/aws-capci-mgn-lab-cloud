@@ -1,7 +1,7 @@
 files: |
-  (?x)(
-      ^dns/|
-      ^target-infra/
+  (?x)^(
+      dns/|
+      target-infra/
   )
 repos:
 - repo: https://github.com/antonbabenko/pre-commit-terraform
