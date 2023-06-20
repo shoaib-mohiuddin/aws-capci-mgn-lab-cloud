@@ -214,6 +214,6 @@ variable "flow_log_per_hour_partition" {
 }
 
 
-variable "foo" {
-  type = string
-}
+# variable "foo" {
+#   type = string
+# }
