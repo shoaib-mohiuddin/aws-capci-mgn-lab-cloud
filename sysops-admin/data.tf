@@ -11,10 +11,8 @@ data "terraform_remote_state" "target_infra" {
     dynamodb_table = "terraform-lock-capci-mgn-lab"
   }
 }
-
-data "aws_ssm_patch_baseline" "default_ubuntu" {
-  owner            = "AWS"
-  operating_system = "UBUNTU"
+data "aws_kms_alias" "backup" {
+  name = "alias/aws/backup"
 }
 
 data "aws_secretsmanager_secret" "sns_email" {

@@ -5,27 +5,42 @@
 // Run the patch baseline every third thursday of the month at 23:30 UTC - "cron(30 23 ? * THU#3 *)"
 // Run the patch baseline every day at 10:00 UTC - "cron(00 10 * * ? *)"
 
-# resource "aws_ssm_patch_baseline" "production" {
-#   name             = "patch-baseline"
-#   operating_system = "UBUNTU"
-# }
+resource "aws_ssm_patch_baseline" "ubuntu" {
+  name             = "patch-baseline-ubuntu"
+  description      = "Patch baseline to be used for Ubuntu machines"
+  operating_system = "UBUNTU"
+  approval_rule {
+    approve_after_days = "7"
+    compliance_level   = "HIGH"
 
-resource "aws_ssm_default_patch_baseline" "baseline" {
-  baseline_id      = data.aws_ssm_patch_baseline.default_ubuntu.id
-  operating_system = data.aws_ssm_patch_baseline.default_ubuntu.operating_system
+    patch_filter {
+      key    = "PRODUCT"
+      values = ["*"]
+    }
+
+    patch_filter {
+      key    = "SECTION"
+      values = ["*"]
+    }
+
+    patch_filter {
+      key    = "PRIORITY"
+      values = ["Required", "Important"]
+    }
+  }
 }
 
 resource "aws_ssm_patch_group" "patchgroup" {
-  baseline_id = data.aws_ssm_patch_baseline.default_ubuntu.id // aws_ssm_default_patch_baseline.baseline.id
+  baseline_id = aws_ssm_patch_baseline.ubuntu.id
   patch_group = "capci"
 }
 
 resource "aws_ssm_maintenance_window" "web_mw" {
-  name              = "maintenance-window-webserver"
-  schedule          = "cron(30 23 ? * THU#3 *)" // "cron(10 11 * * ? *)"
-  schedule_timezone = "Asia/Kolkata"
-  duration          = 3
-  cutoff            = 1
+  name     = "maintenance-window-webserver"
+  schedule = "cron(30 23 ? * THU#3 *)" // "cron(10 11 * * ? *)"
+  # schedule_timezone = "Asia/Kolkata"
+  duration = 3
+  cutoff   = 1
 }
 
 resource "aws_ssm_maintenance_window_target" "web_mw_target" {
@@ -43,6 +58,7 @@ resource "aws_ssm_maintenance_window_target" "web_mw_target" {
 }
 
 resource "aws_ssm_maintenance_window_task" "web_mw_task" {
+  name            = "maintenance-window-webserver-task"
   max_concurrency = 2
   max_errors      = 1
   priority        = 1
@@ -57,20 +73,13 @@ resource "aws_ssm_maintenance_window_task" "web_mw_task" {
 
   task_invocation_parameters {
     run_command_parameters {
-      #   output_s3_bucket     = aws_s3_bucket.example.id
-      #   output_s3_key_prefix = "output"
-      #   service_role_arn     = aws_iam_role.example.arn
-      #   timeout_seconds      = 600
-
-      #   notification_config {
-      #     notification_arn    = aws_sns_topic.example.arn
-      #     notification_events = ["All"]
-      #     notification_type   = "Command"
-      #   }
-
       parameter {
         name   = "Operation"
         values = ["Install"]
+      }
+      parameter {
+        name   = "RebootOption"
+        values = ["RebootIfNeeded"]
       }
     }
   }
@@ -81,18 +90,17 @@ resource "aws_ssm_maintenance_window_task" "web_mw_task" {
 ################################################################################
 
 resource "aws_backup_vault" "backup" {
-  # checkov:skip=CKV_AWS_166: ADD REASON: kms cmk not required 
-  name = "capci-mgn-vault"
-  # kms_key_arn = aws_kms_key.example.arn
+  name        = "capci-mgn-vault"
+  kms_key_arn = data.aws_kms_alias.backup.target_key_arn
 }
 
 resource "aws_backup_plan" "plan" {
   name = "capci_mgn_backup_plan"
 
   rule {
-    rule_name         = "capci_mgn_monthly_backup_rule"
+    rule_name         = "capci_mgn_daily_backup_rule"
     target_vault_name = aws_backup_vault.backup.name
-    schedule          = "cron(30 23 ? * THU#3 *)" // "cron(25 06 * * ? *)"
+    schedule          = "cron(30 23 * * ? *)" // "cron(25 06 * * ? *)"
 
     lifecycle {
       delete_after = 1
@@ -104,11 +112,21 @@ resource "aws_backup_selection" "resource_assignment" {
   iam_role_arn = aws_iam_role.backup_role.arn
   name         = "capci_mgn_backup_ec2"
   plan_id      = aws_backup_plan.plan.id
+  resources = [
+    "arn:aws:ec2:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:volume/*",
+    "arn:aws:ec2:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:instance/*",
+  ]
 
-  selection_tag {
-    type  = "STRINGEQUALS"
-    key   = "Name"
-    value = "webserver-phpmyadmin"
+  # selection_tag {
+  #   type  = "STRINGEQUALS"
+  #   key   = "Name"
+  #   value = "webserver-phpmyadmin"
+  # }
+  condition {
+    string_equals {
+      key   = "aws:ResourceTag/Backup"
+      value = "true"
+    }
   }
 }
 
@@ -124,7 +142,8 @@ resource "aws_ssm_parameter" "cwagent_config_param" {
 }
 
 resource "aws_ssm_association" "install_cwagent" {
-  name = "AWS-ConfigureAWSPackage"
+  name             = "AWS-ConfigureAWSPackage"
+  association_name = "download-install-cwagent"
   targets {
     key    = "tag:Name"
     values = ["webserver-phpmyadmin"]
@@ -135,13 +154,14 @@ resource "aws_ssm_association" "install_cwagent" {
   }
 }
 resource "aws_ssm_association" "configure_cwagent" {
-  name = "AmazonCloudWatch-ManageAgent"
-
+  name             = "AmazonCloudWatch-ManageAgent"
+  association_name = "configure-start-cwagent"
   targets {
     key    = "tag:Name"
     values = ["webserver-phpmyadmin"]
   }
   parameters = {
+    action                        = "configure"
     optionalConfigurationLocation = aws_ssm_parameter.cwagent_config_param.name
   }
   depends_on = [
@@ -212,7 +232,7 @@ resource "aws_cloudwatch_dashboard" "main" {
 #                           CLOUDWATCH      ALARMS                             #
 ################################################################################
 resource "aws_cloudwatch_metric_alarm" "cpu" {
-  alarm_name          = "cpu-usage-${data.terraform_remote_state.target_infra.outputs.webserver_instance_id}"
+  alarm_name          = "high-cpu-usage-${data.terraform_remote_state.target_infra.outputs.webserver_instance_id}"
   comparison_operator = "GreaterThanOrEqualToThreshold"
   evaluation_periods  = 2
   metric_name         = "CPUUtilization"
@@ -224,14 +244,17 @@ resource "aws_cloudwatch_metric_alarm" "cpu" {
   alarm_description   = "This metric monitors ec2 cpu utilization"
   alarm_actions       = [aws_sns_topic.capci_mgn_topic.arn]
   datapoints_to_alarm = 1
+  dimensions = {
+    InstanceId = data.terraform_remote_state.target_infra.outputs.webserver_instance_id
+  }
 }
 
 resource "aws_cloudwatch_metric_alarm" "memory" {
-  alarm_name          = "mem-usage-${data.terraform_remote_state.target_infra.outputs.webserver_instance_id}"
+  alarm_name          = "high-mem-usage-${data.terraform_remote_state.target_infra.outputs.webserver_instance_id}"
   comparison_operator = "GreaterThanOrEqualToThreshold"
   evaluation_periods  = 2
   metric_name         = "mem_used_percent"
-  namespace           = "CapciMgnPhpmyAdmin"
+  namespace           = "CWAgent"
   period              = 300
   statistic           = "Average"
   threshold           = 80
@@ -239,14 +262,17 @@ resource "aws_cloudwatch_metric_alarm" "memory" {
   alarm_description   = "This metric monitors ec2 memory utilization"
   alarm_actions       = [aws_sns_topic.capci_mgn_topic.arn]
   datapoints_to_alarm = 1
+  dimensions = {
+    InstanceId = data.terraform_remote_state.target_infra.outputs.webserver_instance_id
+  }
 }
 
 resource "aws_cloudwatch_metric_alarm" "disk" {
-  alarm_name          = "disk-usage-${data.terraform_remote_state.target_infra.outputs.webserver_instance_id}"
+  alarm_name          = "high-disk-usage-${data.terraform_remote_state.target_infra.outputs.webserver_instance_id}"
   comparison_operator = "GreaterThanOrEqualToThreshold"
   evaluation_periods  = 2
   metric_name         = "disk_used_percent"
-  namespace           = "CapciMgnPhpmyAdmin"
+  namespace           = "CWAgent"
   period              = 300
   statistic           = "Average"
   threshold           = 90
@@ -254,6 +280,9 @@ resource "aws_cloudwatch_metric_alarm" "disk" {
   alarm_description   = "This metric monitors ec2 disk utilization"
   alarm_actions       = [aws_sns_topic.capci_mgn_topic.arn]
   datapoints_to_alarm = 1
+  dimensions = {
+    InstanceId = data.terraform_remote_state.target_infra.outputs.webserver_instance_id
+  }
 }
 
 ################################################################################
@@ -261,13 +290,16 @@ resource "aws_cloudwatch_metric_alarm" "disk" {
 ################################################################################
 resource "aws_sns_topic" "capci_mgn_topic" {
   # checkov:skip=CKV_AWS_26: ADD REASON: encryption not required
-  name = "capci-mgn-lab"
+  name = "capci-mgn-lab-alerts"
 }
 
 resource "aws_sns_topic_subscription" "email_sub" {
   topic_arn = aws_sns_topic.capci_mgn_topic.arn
   protocol  = "email"
   endpoint  = local.email_endpoint
+  // If need to send to multiple email ids, use this
+  # count = length(var.subscription_mails)
+  # endpoint  = var.subscription_mails[count.index]
 }
 
 ################################################################################
