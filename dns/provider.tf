@@ -10,4 +10,11 @@ terraform {
 
 provider "aws" {
   region = var.region
+  default_tags {
+    tags = {
+      "Project"     = "capci-mgn-lab"
+      "Environment" = "Dev"
+      "Platform"    = "on-cloud"
+    }
+  }
 }

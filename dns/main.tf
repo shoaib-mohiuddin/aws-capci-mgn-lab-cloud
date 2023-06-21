@@ -1,7 +1,7 @@
 # Route53 PUBLIC hosted zone
 resource "aws_route53_zone" "primary" {
   name = var.public_domain_name
-  tags = var.tags
+  # tags = var.tags
 }
 
 resource "aws_route53_record" "resolve_test" {
@@ -20,7 +20,7 @@ resource "aws_route53_zone" "private" {
   vpc {
     vpc_id = data.aws_vpc.target_vpc.id
   }
-  tags = var.tags
+  # tags = var.tags
 }
 
 resource "aws_route53_record" "private_resolve_test" {
@@ -41,7 +41,7 @@ resource "aws_acm_certificate" "acm_cert" {
     create_before_destroy = true
   }
 
-  tags = var.tags
+  # tags = var.tags
 }
 
 resource "aws_acm_certificate_validation" "acm_cert_validn" {
