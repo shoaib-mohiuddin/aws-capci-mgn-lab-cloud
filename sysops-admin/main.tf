@@ -112,101 +112,101 @@ resource "aws_backup_selection" "resource_assignment" {
   }
 }
 
-# ################################################################################
-# #                   Collect metrics with CloudWatch Agent                      #
-# ################################################################################
-# // Install the CloudWatch Agent with a custom configuration via Systems Manager
-# resource "aws_ssm_parameter" "cwagent_config_param" {
-#   name        = "CloudwatchAgentConfiguration"
-#   description = "The configuration json for cloudwatch agent"
-#   type        = "String"
-#   value       = file("${path.module}/files/cw_agent_config.json")
-# }
+################################################################################
+#                   Collect metrics with CloudWatch Agent                      #
+################################################################################
+// Install the CloudWatch Agent with a custom configuration via Systems Manager
+resource "aws_ssm_parameter" "cwagent_config_param" {
+  name        = "CloudwatchAgentConfiguration"
+  description = "The configuration json for cloudwatch agent"
+  type        = "String"
+  value       = file("${path.module}/files/cw_agent_config.json")
+}
 
-# resource "aws_ssm_association" "install_cwagent" {
-#   name = "AWS-ConfigureAWSPackage"
-#   targets {
-#     key    = "tag:Name"
-#     values = ["webserver-phpmyadmin"]
-#   }
-#   parameters = {
-#     action = "Install"
-#     name   = "AmazonCloudWatchAgent"
-#   }
-# }
-# resource "aws_ssm_association" "configure_cwagent" {
-#   name = "AmazonCloudWatch-ManageAgent"
+resource "aws_ssm_association" "install_cwagent" {
+  name = "AWS-ConfigureAWSPackage"
+  targets {
+    key    = "tag:Name"
+    values = ["webserver-phpmyadmin"]
+  }
+  parameters = {
+    action = "Install"
+    name   = "AmazonCloudWatchAgent"
+  }
+}
+resource "aws_ssm_association" "configure_cwagent" {
+  name = "AmazonCloudWatch-ManageAgent"
 
-#   targets {
-#     key    = "tag:Name"
-#     values = ["webserver-phpmyadmin"]
-#   }
-#   parameters = {
-#     optionalConfigurationLocation = aws_ssm_parameter.cwagent_config_param.name
-#   }
-#   depends_on = [
-#     aws_ssm_association.install_cwagent
-#   ]
-# }
+  targets {
+    key    = "tag:Name"
+    values = ["webserver-phpmyadmin"]
+  }
+  parameters = {
+    optionalConfigurationLocation = aws_ssm_parameter.cwagent_config_param.name
+  }
+  depends_on = [
+    aws_ssm_association.install_cwagent
+  ]
+}
 
-# ################################################################################
-# #                           CLOUDWATCH  DASHBOARD                              #
-# ################################################################################
-# resource "aws_cloudwatch_dashboard" "main" {
-#   dashboard_name = "CAPCI-MIGRATION-LAB"
+################################################################################
+#                           CLOUDWATCH  DASHBOARD                              #
+################################################################################
+resource "aws_cloudwatch_dashboard" "main" {
+  dashboard_name = "CAPCI-MIGRATION-LAB"
 
-#   dashboard_body = jsonencode({
-#     widgets : [
-#       {
-#         "type" : "explorer",
-#         "width" : 24,
-#         "height" : 15,
-#         "x" : 0,
-#         "y" : 0,
-#         "properties" : {
-#           "metrics" : [
-#             {
-#               "metricName" : "CPUUtilization",
-#               "resourceType" : "AWS::EC2::Instance",
-#               "stat" : "Average"
-#             },
-#             {
-#               "metricName" : "disk_used_percent",
-#               "resourceType" : "AWS::EC2::Instance",
-#               "stat" : "Average"
-#             },
-#             {
-#               "metricName" : "mem_used_percent",
-#               "resourceType" : "AWS::EC2::Instance",
-#               "stat" : "Average"
-#             }
-#           ],
-#           "aggregateBy" : {
-#             "key" : "InstanceId",
-#             "func" : "AVG"
-#           },
-#           "labels" : [
-#             {
-#               "key" : "Name",
-#               "value" : "webserver-phpmyadmin"
-#             }
-#           ],
-#           "widgetOptions" : {
-#             "legend" : {
-#               "position" : "bottom"
-#             },
-#             "view" : "timeSeries",
-#             "rowsPerPage" : 8,
-#             "widgetsPerRow" : 2
-#           },
-#           "period" : 300,
-#           "splitBy" : "InstanceId",
-#           "title" : "EC2 METRICS CAPCI-MIGRATION-LAB"
-#         }
-#       }
-#     ]
-#   })
-# }
+  dashboard_body = jsonencode({
+    widgets : [
+      {
+        "type" : "explorer",
+        "width" : 24,
+        "height" : 15,
+        "x" : 0,
+        "y" : 0,
+        "properties" : {
+          "metrics" : [
+            {
+              "metricName" : "CPUUtilization",
+              "resourceType" : "AWS::EC2::Instance",
+              "stat" : "Average"
+            },
+            {
+              "metricName" : "disk_used_percent",
+              "resourceType" : "AWS::EC2::Instance",
+              "stat" : "Average"
+            },
+            {
+              "metricName" : "mem_used_percent",
+              "resourceType" : "AWS::EC2::Instance",
+              "stat" : "Average"
+            }
+          ],
+          "aggregateBy" : {
+            "key" : "InstanceId",
+            "func" : "AVG"
+          },
+          "labels" : [
+            {
+              "key" : "Name",
+              "value" : "webserver-phpmyadmin"
+            }
+          ],
+          "widgetOptions" : {
+            "legend" : {
+              "position" : "bottom"
+            },
+            "view" : "timeSeries",
+            "rowsPerPage" : 8,
+            "widgetsPerRow" : 2
+          },
+          "period" : 300,
+          "splitBy" : "InstanceId",
+          "title" : "EC2 METRICS CAPCI-MIGRATION-LAB"
+        }
+      }
+    ]
+  })
+}
 
 # ################################################################################
 # #                           CLOUDWATCH      ALARMS                             #
