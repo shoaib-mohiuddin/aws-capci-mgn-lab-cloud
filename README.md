@@ -80,7 +80,6 @@
 | <a name="input_flow_log_max_aggregation_interval"></a> [flow\_log\_max\_aggregation\_interval](#input\_flow\_log\_max\_aggregation\_interval) | The maximum interval of time during which a flow of packets is captured and aggregated into a flow log record. Valid Values: 60 seconds or 600 seconds | `number` | `60` | no |
 | <a name="input_flow_log_per_hour_partition"></a> [flow\_log\_per\_hour\_partition](#input\_flow\_log\_per\_hour\_partition) | Indicates whether to partition the flow log per hour. This reduces the cost and response time for queries | `bool` | `true` | no |
 | <a name="input_flow_log_traffic_type"></a> [flow\_log\_traffic\_type](#input\_flow\_log\_traffic\_type) | The type of traffic to capture. Valid values: ACCEPT, REJECT, ALL | `string` | `"ALL"` | no |
-| <a name="input_foo"></a> [foo](#input\_foo) | n/a | `bool` | n/a | yes |
 | <a name="input_igw_name"></a> [igw\_name](#input\_igw\_name) | Internet gateway tag name | `string` | n/a | yes |
 | <a name="input_instance_class"></a> [instance\_class](#input\_instance\_class) | Instance type to use | `string` | n/a | yes |
 | <a name="input_instance_name"></a> [instance\_name](#input\_instance\_name) | Name tag for the instance | `string` | `"webserver-phpmyadmin"` | no |
