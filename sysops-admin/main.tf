@@ -76,61 +76,41 @@ resource "aws_ssm_maintenance_window_task" "web_mw_task" {
   }
 }
 
-# ################################################################################
-# #                               AWS BACKUP                                     #
-# ################################################################################
-# resource "aws_backup_region_settings" "uswest2" {
-#   resource_type_opt_in_preference = {
-#     "Aurora"                 = false
-#     "DocumentDB"             = false
-#     "DynamoDB"               = false
-#     "EBS"                    = true
-#     "EC2"                    = true
-#     "EFS"                    = false
-#     "FSx"                    = false
-#     "Neptune"                = false
-#     "RDS"                    = false
-#     "Storage Gateway"        = false
-#     "VirtualMachine"         = false
-#     "CloudFormation"         = false
-#     "Redshift"               = false
-#     "S3"                     = false
-#     "SAP HANA on Amazon EC2" = false
-#     "Timestream"             = false
-#   }
-# }
+################################################################################
+#                               AWS BACKUP                                     #
+################################################################################
 
-# resource "aws_backup_vault" "backup" {
-#   # checkov:skip=CKV_AWS_166: ADD REASON: kms cmk not required 
-#   name = "capci-mgn-vault"
-#   # kms_key_arn = aws_kms_key.example.arn
-# }
+resource "aws_backup_vault" "backup" {
+  # checkov:skip=CKV_AWS_166: ADD REASON: kms cmk not required 
+  name = "capci-mgn-vault"
+  # kms_key_arn = aws_kms_key.example.arn
+}
 
-# resource "aws_backup_plan" "plan" {
-#   name = "capci_mgn_backup_plan"
+resource "aws_backup_plan" "plan" {
+  name = "capci_mgn_backup_plan"
 
-#   rule {
-#     rule_name         = "capci_mgn_monthly_backup_rule"
-#     target_vault_name = aws_backup_vault.backup.name
-#     schedule          = "cron(30 23 ? * THU#3 *)" // "cron(30 10 * * ? *)"
+  rule {
+    rule_name         = "capci_mgn_monthly_backup_rule"
+    target_vault_name = aws_backup_vault.backup.name
+    schedule          = "cron(30 23 ? * THU#3 *)" // "cron(25 06 * * ? *)"
 
-#     lifecycle {
-#       delete_after = 7
-#     }
-#   }
-# }
+    lifecycle {
+      delete_after = 1
+    }
+  }
+}
 
-# resource "aws_backup_selection" "resource_assignment" {
-#   iam_role_arn = aws_iam_role.backup_role.arn
-#   name         = "capci_mgn_backup_ec2"
-#   plan_id      = aws_backup_plan.plan.id
+resource "aws_backup_selection" "resource_assignment" {
+  iam_role_arn = aws_iam_role.backup_role.arn
+  name         = "capci_mgn_backup_ec2"
+  plan_id      = aws_backup_plan.plan.id
 
-#   selection_tag {
-#     type  = "STRINGEQUALS"
-#     key   = "Name"
-#     value = "webserver-phpmyadmin"
-#   }
-# }
+  selection_tag {
+    type  = "STRINGEQUALS"
+    key   = "Name"
+    value = "webserver-phpmyadmin"
+  }
+}
 
 # ################################################################################
 # #                   Collect metrics with CloudWatch Agent                      #
