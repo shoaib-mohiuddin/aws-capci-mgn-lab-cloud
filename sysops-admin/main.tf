@@ -256,16 +256,16 @@ resource "aws_cloudwatch_dashboard" "main" {
 #   datapoints_to_alarm = 1
 # }
 
-# ################################################################################
-# #                           SNS EMAIL NOTIFICATION                             #
-# ################################################################################
-# resource "aws_sns_topic" "capci_mgn_topic" {
-#   # checkov:skip=CKV_AWS_26: ADD REASON: encryption not required
-#   name = "capci-mgn-lab"
-# }
+################################################################################
+#                           SNS EMAIL NOTIFICATION                             #
+################################################################################
+resource "aws_sns_topic" "capci_mgn_topic" {
+  # checkov:skip=CKV_AWS_26: ADD REASON: encryption not required
+  name = "capci-mgn-lab"
+}
 
-# resource "aws_sns_topic_subscription" "email_sub" {
-#   topic_arn = aws_sns_topic.capci_mgn_topic.arn
-#   protocol  = "email"
-#   endpoint  = local.email_endpoint
-# }
+resource "aws_sns_topic_subscription" "email_sub" {
+  topic_arn = aws_sns_topic.capci_mgn_topic.arn
+  protocol  = "email"
+  endpoint  = local.email_endpoint
+}
