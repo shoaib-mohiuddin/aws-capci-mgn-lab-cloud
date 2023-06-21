@@ -208,53 +208,53 @@ resource "aws_cloudwatch_dashboard" "main" {
   })
 }
 
-# ################################################################################
-# #                           CLOUDWATCH      ALARMS                             #
-# ################################################################################
-# resource "aws_cloudwatch_metric_alarm" "cpu" {
-#   alarm_name          = "cpu-usage-${data.terraform_remote_state.target_infra.outputs.webserver_instance_id}"
-#   comparison_operator = "GreaterThanOrEqualToThreshold"
-#   evaluation_periods  = 2
-#   metric_name         = "CPUUtilization"
-#   namespace           = "AWS/EC2"
-#   period              = 300
-#   statistic           = "Average"
-#   threshold           = 90
-#   actions_enabled     = true
-#   alarm_description   = "This metric monitors ec2 cpu utilization"
-#   alarm_actions       = [aws_sns_topic.capci_mgn_topic.arn]
-#   datapoints_to_alarm = 1
-# }
+################################################################################
+#                           CLOUDWATCH      ALARMS                             #
+################################################################################
+resource "aws_cloudwatch_metric_alarm" "cpu" {
+  alarm_name          = "cpu-usage-${data.terraform_remote_state.target_infra.outputs.webserver_instance_id}"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = 2
+  metric_name         = "CPUUtilization"
+  namespace           = "AWS/EC2"
+  period              = 300
+  statistic           = "Average"
+  threshold           = 90
+  actions_enabled     = true
+  alarm_description   = "This metric monitors ec2 cpu utilization"
+  alarm_actions       = [aws_sns_topic.capci_mgn_topic.arn]
+  datapoints_to_alarm = 1
+}
 
-# resource "aws_cloudwatch_metric_alarm" "memory" {
-#   alarm_name          = "mem-usage-${data.terraform_remote_state.target_infra.outputs.webserver_instance_id}"
-#   comparison_operator = "GreaterThanOrEqualToThreshold"
-#   evaluation_periods  = 2
-#   metric_name         = "mem_used_percent"
-#   namespace           = "CapciMgnPhpmyAdmin"
-#   period              = 300
-#   statistic           = "Average"
-#   threshold           = 80
-#   actions_enabled     = true
-#   alarm_description   = "This metric monitors ec2 memory utilization"
-#   alarm_actions       = [aws_sns_topic.capci_mgn_topic.arn]
-#   datapoints_to_alarm = 1
-# }
+resource "aws_cloudwatch_metric_alarm" "memory" {
+  alarm_name          = "mem-usage-${data.terraform_remote_state.target_infra.outputs.webserver_instance_id}"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = 2
+  metric_name         = "mem_used_percent"
+  namespace           = "CapciMgnPhpmyAdmin"
+  period              = 300
+  statistic           = "Average"
+  threshold           = 80
+  actions_enabled     = true
+  alarm_description   = "This metric monitors ec2 memory utilization"
+  alarm_actions       = [aws_sns_topic.capci_mgn_topic.arn]
+  datapoints_to_alarm = 1
+}
 
-# resource "aws_cloudwatch_metric_alarm" "disk" {
-#   alarm_name          = "disk-usage-${data.terraform_remote_state.target_infra.outputs.webserver_instance_id}"
-#   comparison_operator = "GreaterThanOrEqualToThreshold"
-#   evaluation_periods  = 2
-#   metric_name         = "disk_used_percent"
-#   namespace           = "CapciMgnPhpmyAdmin"
-#   period              = 300
-#   statistic           = "Average"
-#   threshold           = 90
-#   actions_enabled     = true
-#   alarm_description   = "This metric monitors ec2 disk utilization"
-#   alarm_actions       = [aws_sns_topic.capci_mgn_topic.arn]
-#   datapoints_to_alarm = 1
-# }
+resource "aws_cloudwatch_metric_alarm" "disk" {
+  alarm_name          = "disk-usage-${data.terraform_remote_state.target_infra.outputs.webserver_instance_id}"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = 2
+  metric_name         = "disk_used_percent"
+  namespace           = "CapciMgnPhpmyAdmin"
+  period              = 300
+  statistic           = "Average"
+  threshold           = 90
+  actions_enabled     = true
+  alarm_description   = "This metric monitors ec2 disk utilization"
+  alarm_actions       = [aws_sns_topic.capci_mgn_topic.arn]
+  datapoints_to_alarm = 1
+}
 
 ################################################################################
 #                           SNS EMAIL NOTIFICATION                             #
