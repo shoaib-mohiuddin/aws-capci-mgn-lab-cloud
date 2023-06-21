@@ -1,77 +1,80 @@
-# ################################################################################
-# #                  SSM PATCH MANAGER & MAINTENANCE WINDOW                      #
-# ################################################################################
+################################################################################
+#                  SSM PATCH MANAGER & MAINTENANCE WINDOW                      #
+################################################################################
 
-# # resource "aws_ssm_patch_baseline" "production" {
-# #   name             = "patch-baseline"
-# #   operating_system = "UBUNTU"
-# # }
+// Run the patch baseline every third thursday of the month at 23:30 UTC - "cron(30 23 ? * THU#3 *)"
+// Run the patch baseline every day at 10:00 UTC - "cron(00 10 * * ? *)"
 
-# resource "aws_ssm_default_patch_baseline" "baseline" {
-#   baseline_id      = data.aws_ssm_patch_baseline.default_ubuntu.id
-#   operating_system = data.aws_ssm_patch_baseline.default_ubuntu.operating_system
+# resource "aws_ssm_patch_baseline" "production" {
+#   name             = "patch-baseline"
+#   operating_system = "UBUNTU"
 # }
 
-# resource "aws_ssm_patch_group" "patchgroup" {
-#   baseline_id = data.aws_ssm_patch_baseline.default_ubuntu.id // aws_ssm_default_patch_baseline.baseline.id
-#   patch_group = "capci"
-# }
+resource "aws_ssm_default_patch_baseline" "baseline" {
+  baseline_id      = data.aws_ssm_patch_baseline.default_ubuntu.id
+  operating_system = data.aws_ssm_patch_baseline.default_ubuntu.operating_system
+}
 
-# resource "aws_ssm_maintenance_window" "web_mw" {
-#   name              = "maintenance-window-webserver"
-#   schedule          = "cron(30 23 ? * THU#3 *)" // "cron(11 16 * * ? *)"
-#   schedule_timezone = "Asia/Kolkata"
-#   duration          = 3
-#   cutoff            = 1
-# }
+resource "aws_ssm_patch_group" "patchgroup" {
+  baseline_id = data.aws_ssm_patch_baseline.default_ubuntu.id // aws_ssm_default_patch_baseline.baseline.id
+  patch_group = "capci"
+}
 
-# resource "aws_ssm_maintenance_window_target" "web_mw_target" {
-#   window_id     = aws_ssm_maintenance_window.web_mw.id
-#   name          = "maintenance-window-webserver-target"
-#   description   = "This is a maintenance window target"
-#   resource_type = "INSTANCE"
+resource "aws_ssm_maintenance_window" "web_mw" {
+  name              = "maintenance-window-webserver"
+  schedule          = "cron(30 23 ? * THU#3 *)" // "cron(10 11 * * ? *)"
+  schedule_timezone = "Asia/Kolkata"
+  duration          = 3
+  cutoff            = 1
+}
 
-#   targets {
-#     # key    = "tag:Name"
-#     # values = ["webserver-phpmyadmin"]
-#     key    = "tag:PatchGroup"
-#     values = ["capci"]
-#   }
-# }
+resource "aws_ssm_maintenance_window_target" "web_mw_target" {
+  window_id     = aws_ssm_maintenance_window.web_mw.id
+  name          = "maintenance-window-webserver-target"
+  description   = "This is a maintenance window target"
+  resource_type = "INSTANCE"
 
-# resource "aws_ssm_maintenance_window_task" "web_mw_task" {
-#   max_concurrency = 2
-#   max_errors      = 1
-#   priority        = 1
-#   task_arn        = "AWS-RunPatchBaseline"
-#   task_type       = "RUN_COMMAND"
-#   window_id       = aws_ssm_maintenance_window.web_mw.id
+  targets {
+    # key    = "tag:Name"
+    # values = ["webserver-phpmyadmin"]
+    key    = "tag:PatchGroup"
+    values = ["capci"]
+  }
+}
 
-#   targets {
-#     key    = "WindowTargetIds"
-#     values = [aws_ssm_maintenance_window_target.web_mw_target.id]
-#   }
+resource "aws_ssm_maintenance_window_task" "web_mw_task" {
+  max_concurrency = 2
+  max_errors      = 1
+  priority        = 1
+  task_arn        = "AWS-RunPatchBaseline"
+  task_type       = "RUN_COMMAND"
+  window_id       = aws_ssm_maintenance_window.web_mw.id
 
-#   task_invocation_parameters {
-#     run_command_parameters {
-#       #   output_s3_bucket     = aws_s3_bucket.example.id
-#       #   output_s3_key_prefix = "output"
-#       #   service_role_arn     = aws_iam_role.example.arn
-#       #   timeout_seconds      = 600
+  targets {
+    key    = "WindowTargetIds"
+    values = [aws_ssm_maintenance_window_target.web_mw_target.id]
+  }
 
-#       #   notification_config {
-#       #     notification_arn    = aws_sns_topic.example.arn
-#       #     notification_events = ["All"]
-#       #     notification_type   = "Command"
-#       #   }
+  task_invocation_parameters {
+    run_command_parameters {
+      #   output_s3_bucket     = aws_s3_bucket.example.id
+      #   output_s3_key_prefix = "output"
+      #   service_role_arn     = aws_iam_role.example.arn
+      #   timeout_seconds      = 600
 
-#       parameter {
-#         name   = "Operation"
-#         values = ["Install"]
-#       }
-#     }
-#   }
-# }
+      #   notification_config {
+      #     notification_arn    = aws_sns_topic.example.arn
+      #     notification_events = ["All"]
+      #     notification_type   = "Command"
+      #   }
+
+      parameter {
+        name   = "Operation"
+        values = ["Install"]
+      }
+    }
+  }
+}
 
 # ################################################################################
 # #                               AWS BACKUP                                     #

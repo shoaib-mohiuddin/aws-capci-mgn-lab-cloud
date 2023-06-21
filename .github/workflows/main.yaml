@@ -16,7 +16,7 @@ jobs:
         working-directory: 
           - dns
           - target-infra
-          # - sysops-admin
+          - sysops-admin
     defaults:
       run:
         working-directory: ${{ matrix.working-directory }}
@@ -144,7 +144,7 @@ jobs:
         working-directory: 
           - dns
           - target-infra
-          # - sysops-admin
+          - sysops-admin
     defaults:
       run:
         shell: bash
