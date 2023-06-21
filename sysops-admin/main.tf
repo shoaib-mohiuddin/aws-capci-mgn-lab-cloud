@@ -269,3 +269,77 @@ resource "aws_sns_topic_subscription" "email_sub" {
   protocol  = "email"
   endpoint  = local.email_endpoint
 }
+
+################################################################################
+#                       Setup ATHENA to query Logs in S3                       #
+################################################################################
+resource "aws_athena_database" "vpc_flow_logs_db" {
+  # checkov:skip=CKV_AWS_77: ADD REASON: encryption not required
+  name          = "vpc_flow_logs_db"
+  bucket        = "${data.terraform_remote_state.target_infra.outputs.logs_bucket_id}/aws-athena-query-results"
+  force_destroy = true //(Default: false) All tables should be deleted from the db so that the db can be destroyed without error.
+}
+
+resource "aws_athena_named_query" "create_table" {
+  name     = "create-vpc-flow-logs-table"
+  database = aws_athena_database.vpc_flow_logs_db.name
+  query    = <<-EOF
+  CREATE EXTERNAL TABLE IF NOT EXISTS `vpc_flow_logs` (
+    `version` int, 
+    `account_id` string, 
+    `interface_id` string, 
+    `srcaddr` string, 
+    `dstaddr` string, 
+    `srcport` int, 
+    `dstport` int, 
+    `protocol` bigint, 
+    `packets` bigint, 
+    `bytes` bigint, 
+    `start` bigint, 
+    `end` bigint, 
+    `action` string, 
+    `log_status` string, 
+    `vpc_id` string, 
+    `subnet_id` string, 
+    `instance_id` string, 
+    `tcp_flags` int, 
+    `type` string, 
+    `pkt_srcaddr` string, 
+    `pkt_dstaddr` string, 
+    `region` string, 
+    `az_id` string, 
+    `sublocation_type` string, 
+    `sublocation_id` string, 
+    `pkt_src_aws_service` string, 
+    `pkt_dst_aws_service` string, 
+    `flow_direction` string, 
+    `traffic_path` int
+  )
+  PARTITIONED BY (`date` date)
+  ROW FORMAT DELIMITED
+  FIELDS TERMINATED BY ' '
+  LOCATION "s3://${data.terraform_remote_state.target_infra.outputs.logs_bucket_id}/AWSLogs/${data.aws_caller_identity.current.account_id}/vpcflowlogs/${data.aws_region.current.name}/"
+  TBLPROPERTIES ("skip.header.line.count"="1");
+  EOF
+}
+
+resource "aws_athena_named_query" "partition" {
+  name     = "add-partition"
+  database = aws_athena_database.vpc_flow_logs_db.name
+  query    = <<EOF
+  ALTER TABLE vpc_flow_logs 
+  ADD PARTITION (`date`='2023') LOCATION "s3://${data.terraform_remote_state.target_infra.outputs.logs_bucket_id}/AWSLogs/${data.aws_caller_identity.current.account_id}/vpcflowlogs/${data.aws_region.current.name}/2023"
+EOF
+}
+
+resource "aws_athena_named_query" "get_logs" {
+  name     = "get-vpc-flow-logs"
+  database = aws_athena_database.vpc_flow_logs_db.name
+  query    = "SELECT * FROM vpc_flow_logs;"
+}
+
+resource "aws_athena_named_query" "select_vpc_cidr" {
+  name     = "select-vpc-cidr"
+  database = aws_athena_database.vpc_flow_logs_db.name
+  query    = "SELECT dstaddr,srcaddr,srcport,dstport,vpc_id,subnet_id,instance_id FROM vpc_flow_logs WHERE dstaddr BETWEEN '192.168.0.1' AND '192.168.15.24';"
+}
