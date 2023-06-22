@@ -187,6 +187,6 @@ variable "flow_log_per_hour_partition" {
   default     = true
 }
 
-# variable "foo" {
-#   type = bool
-# }
+variable "foo" {
+  type = bool
+}
