@@ -1,4 +1,4 @@
-files: |
+files: |                 ########## files: (^dns/|^sysops-admin/|^target-infra/)
   (?x)^(
       dns/|
       target-infra/|
@@ -6,15 +6,16 @@ files: |
   )
 repos:
 - repo: https://github.com/antonbabenko/pre-commit-terraform
-  rev: v1.79.1 # Get the latest from: https://github.com/antonbabenko/pre-commit-terraform/releases
+  rev: v1.81.0 # Get the latest from: https://github.com/antonbabenko/pre-commit-terraform/releases
   hooks:
     - id: terraform_fmt
     - id: terraform_validate
-    # - id: terraform_tflint
-    # - id: terraform_tfsec
     - id: terraform_docs
       args:
-        - --hook-config=--path-to-file=../README.md        
+        - --hook-config=--path-to-file=../README.md
+        - --hook-config=--add-to-existing-file=true
+    # - id: terraform_tflint
+    # - id: terraform_tfsec
     # - id: terraform_checkov
 
 - repo: https://github.com/awslabs/git-secrets
@@ -27,13 +28,13 @@ repos:
       language: script
       # files: \.(js|py|sh|yml|yaml|json|tf)$
 
-# - repo: https://github.com/pre-commit/pre-commit-hooks
-#   rev: v4.1.0
-#   hooks:
-#     - id: trailing-whitespace
-#     - id: end-of-file-fixer
-#     - id: check-yaml
-#     - id: check-added-large-files
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.4.0
+  hooks:
+    - id: trailing-whitespace
+    - id: end-of-file-fixer
+    - id: check-yaml
+    - id: check-added-large-files
 
 # - repo: https://github.com/terraform-docs/terraform-docs
 #   rev: v0.16.0
