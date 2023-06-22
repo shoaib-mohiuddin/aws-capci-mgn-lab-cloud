@@ -3,6 +3,6 @@ variable "region" {
   type        = string
 }
 
-variable "foo" {
-  type = bool
-}
+# variable "foo" {
+#   type = bool
+# }

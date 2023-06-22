@@ -23,6 +23,6 @@ variable "subdomain_name" {
 #   type        = map(string)
 # }
 
-variable "foo" {
-  type = bool
-}
+# variable "foo" {
+#   type = bool
+# }
