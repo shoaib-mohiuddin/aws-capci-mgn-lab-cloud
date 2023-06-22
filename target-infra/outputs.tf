@@ -17,3 +17,7 @@ output "webserver_instance_id" {
 output "db_instance_address" {
   value = module.rds.db_instance_address
 }
+
+output "logs_bucket_id" {
+  value = module.logs_bucket.s3_bucket_id
+}

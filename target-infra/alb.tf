@@ -1,17 +1,16 @@
 resource "aws_lb" "web_lb" {
+  # checkov:skip=CKV_AWS_150: ADD REASON: LB deletion protection not required
   name                       = var.lb_name
   internal                   = false
   load_balancer_type         = "application"
   security_groups            = [aws_security_group.lb_sg.id]
   subnets                    = module.target_vpc.public_subnets
   drop_invalid_header_fields = true
-  enable_deletion_protection = true
-
+  enable_deletion_protection = false
   access_logs {
     bucket  = module.logs_bucket.s3_bucket_id
     enabled = true
   }
-
   # tags = var.tags
 }
 

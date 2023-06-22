@@ -22,6 +22,7 @@ resource "aws_instance" "webserver" {
   tags = {
     "Name"       = var.instance_name
     "PatchGroup" = "capci"
+    "Backup"     = "true"
   }
 }
 

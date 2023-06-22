@@ -18,7 +18,7 @@ variable "subdomain_name" {
   type        = string
 }
 
-variable "tags" {
-  description = "Tags for the resources"
-  type        = map(string)
-}
+# variable "tags" {
+#   description = "Tags for the resources"
+#   type        = map(string)
+# }
